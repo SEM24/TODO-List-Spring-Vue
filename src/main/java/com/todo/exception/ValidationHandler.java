@@ -1,8 +1,8 @@
 package com.todo.exception;
 
-import com.security.fiverr.exception.dto.ErrorMessage;
-import com.security.fiverr.exception.dto.ErrorMessageResponse;
-import com.security.fiverr.exception.service.PropertiesMessageService;
+import com.todo.exception.dto.ErrorMessage;
+import com.todo.exception.dto.ErrorMessageResponse;
+import com.todo.exception.service.PropertiesMessageService;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;

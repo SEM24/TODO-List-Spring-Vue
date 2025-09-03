@@ -1,7 +1,7 @@
 package com.todo.security.userdetails;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.security.fiverr.user.model.enitity.User;
+import com.todo.user.model.enitity.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

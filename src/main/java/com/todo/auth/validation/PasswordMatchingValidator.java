@@ -1,6 +1,6 @@
 package com.todo.auth.validation;
 
-import com.security.fiverr.auth.model.dto.RegisterRequest;
+import com.todo.auth.model.dto.RegisterRequest;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 

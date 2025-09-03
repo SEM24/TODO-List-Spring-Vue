@@ -1,7 +1,6 @@
 package com.todo.auth.model.dto;
 
-import com.security.fiverr.auth.validation.PasswordMatching;
-import com.security.fiverr.user.model.enitity.ERole;
+import com.todo.auth.validation.PasswordMatching;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;

@@ -1,8 +1,8 @@
 package com.todo.security.userdetails.services;
 
-import com.security.fiverr.security.userdetails.UserDetailsImpl;
-import com.security.fiverr.user.model.enitity.User;
-import com.security.fiverr.user.repository.UserRepository;
+import com.todo.security.userdetails.UserDetailsImpl;
+import com.todo.user.model.enitity.User;
+import com.todo.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

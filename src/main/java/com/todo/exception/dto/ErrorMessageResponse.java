@@ -1,6 +1,6 @@
 package com.todo.exception.dto;
 
-import com.security.fiverr.exception.MessageType;
+import com.todo.exception.MessageType;
 import lombok.Builder;
 import org.springframework.http.HttpStatus;
 

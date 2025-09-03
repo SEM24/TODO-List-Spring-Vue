@@ -1,10 +1,10 @@
 package com.todo.security.config;
 
-import com.security.fiverr.security.jwt.JwtAccessDeniedHandler;
-import com.security.fiverr.security.jwt.JwtAuthenticationEntryPoint;
-import com.security.fiverr.security.jwt.JwtAuthenticationFilter;
-import com.security.fiverr.security.oauth2.handler.OAuth2SuccessHandler;
-import com.security.fiverr.security.userdetails.services.UserDetailsServiceImpl;
+import com.todo.security.jwt.JwtAccessDeniedHandler;
+import com.todo.security.jwt.JwtAuthenticationEntryPoint;
+import com.todo.security.jwt.JwtAuthenticationFilter;
+import com.todo.security.oauth2.handler.OAuth2SuccessHandler;
+import com.todo.security.userdetails.services.UserDetailsServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
