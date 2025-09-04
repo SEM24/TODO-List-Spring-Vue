@@ -44,7 +44,7 @@ export default {
       try {
         this.success = true
         this.loading = false
-        this.$router.push("/dashboard")
+        this.$router.push("/tasks")
       } catch (error) {
         console.error('Error handling OAuth success:', error)
         this.handleError('Token processing error')
@@ -63,7 +63,7 @@ export default {
         this.loading = false
 
         setTimeout(() => {
-          this.$router.push('/dashboard')
+          this.$router.push('/tasks')
         }, 2000)
 
       } catch (error) {

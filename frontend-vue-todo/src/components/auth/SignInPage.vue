@@ -112,7 +112,7 @@ export default {
         if (result.success) {
           this.showMessage(result.message, 'success')
           setTimeout(() => {
-            this.$router.push('/dashboard')
+            this.$router.push('/tasks')
           }, 1000)
         } else {
           this.showMessage(result.error, 'error')

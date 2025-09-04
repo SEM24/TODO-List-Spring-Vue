@@ -1,9 +1,10 @@
 import {createRouter, createWebHistory} from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import OAuthCallback from "@/views/OAuthCallback.vue";
-import SignInPage from "@/components/SignInPage.vue";
-import RegisterPage from "@/components/RegisterPage.vue";
-import UserPage from "@/components/UserPage.vue";
+import SignInPage from "@/components/auth/SignInPage.vue";
+import RegisterPage from "@/components/auth/RegisterPage.vue";
+import UserPage from "@/components/auth/UserPage.vue";
+import TaskList from "@/components/tasks/TaskList.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -29,6 +30,12 @@ const router = createRouter({
       path: '/dashboard',
       name: 'dashboard',
       component: UserPage,
+      meta: {requiresAuth: true}
+    },
+    {
+      path: '/tasks',
+      name: 'tasks',
+      component: TaskList,
       meta: {requiresAuth: true}
     },
     // {
