@@ -24,6 +24,23 @@ public class TaskServiceImpl implements TaskService {
     private final UserService userService;
 
     @Override
+    public List<TaskResponse> getTasksWithFilter(Long userId, Boolean completed, String priority, String search, boolean overdue, boolean today) {
+        if (overdue) return getOverdueTasks(userId);
+        if (today) return getTodayTasks(userId);
+        if (search != null && !search.isBlank()) return searchTasks(userId, search.trim());
+        if (completed != null) return getTaskByStatus(userId, completed);
+        if (priority != null) {
+            try {
+                return getTaskByPriority(userId, Priority.valueOf(priority.toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                throw new GlobalServiceException(HttpStatus.BAD_REQUEST, "Invalid priority value: " + priority);
+            }
+        }
+        return getAllTasksForUser(userId);
+    }
+
+
+    @Override
     public List<TaskResponse> getAllTasksForUser(Long userId) {
         return taskRepository.findByUserIdOrderByCreatedAtDesc(userId).stream().map(TaskResponse::from).toList();
     }
@@ -59,7 +76,7 @@ public class TaskServiceImpl implements TaskService {
                 .map(TaskResponse::from)
                 .toList();
     }
-
+    @Override
     public TaskResponse createTask(Long userId, TaskCreateRequest request) {
         User user = userService.findById(userId);
 
@@ -75,7 +92,7 @@ public class TaskServiceImpl implements TaskService {
         Task savedTask = taskRepository.save(task);
         return TaskResponse.from(savedTask);
     }
-
+    @Override
     public TaskResponse updateTask(Long userId, Long taskId, TaskUpdateRequest request) {
         Task task = getTaskByIdAndUserId(taskId, userId);
 
@@ -91,7 +108,7 @@ public class TaskServiceImpl implements TaskService {
         Task savedTask = taskRepository.save(task);
         return TaskResponse.from(savedTask);
     }
-
+    @Override
     public TaskResponse toggleTaskCompletion(Long userId, Long taskId) {
         Task task = getTaskByIdAndUserId(taskId, userId);
         task.setCompleted(!task.getCompleted());

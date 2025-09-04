@@ -9,11 +9,12 @@ import com.todo.user.repository.RoleRepository;
 import com.todo.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
-import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -46,6 +47,10 @@ public class UserService {
 
     public User getUserFromUserDetails(UserDetailsImpl userDetails) {
         return findByEmail(userDetails.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found with email: " + userDetails.getEmail()));
+                .orElseThrow(() -> new GlobalServiceException(HttpStatus.NOT_FOUND, "User not found with email: " + userDetails.getEmail()));
+    }
+    public User getCurrentUser(Authentication authentication) {
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        return getUserFromUserDetails(userDetails);
     }
 }

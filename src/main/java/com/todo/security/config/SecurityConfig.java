@@ -97,6 +97,12 @@ public class SecurityConfig {
                         .requestMatchers("/oauth2/**").permitAll()
                         .requestMatchers("/login/oauth2/**").permitAll()
                         .requestMatchers("/oauth-test.html").permitAll()
+                        //todo supposed to be for moderators only in prod
+                        .requestMatchers(
+                                "/swagger",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**"
+                        ).permitAll()
                         .requestMatchers("/error").permitAll()
                         // All other requests require authentication
                         .anyRequest().authenticated()

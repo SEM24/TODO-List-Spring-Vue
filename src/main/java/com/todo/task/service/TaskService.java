@@ -1,6 +1,8 @@
 package com.todo.task.service;
 
+import com.todo.task.model.dto.TaskCreateRequest;
 import com.todo.task.model.dto.TaskResponse;
+import com.todo.task.model.dto.TaskUpdateRequest;
 import com.todo.task.model.enitity.Priority;
 
 import java.util.List;
@@ -18,7 +20,15 @@ public interface TaskService {
 
     List<TaskResponse> getTodayTasks(Long userId);
 
+    TaskResponse createTask(Long userId, TaskCreateRequest request);
+
+    TaskResponse updateTask(Long userId, Long taskId, TaskUpdateRequest request);
+
+    TaskResponse toggleTaskCompletion(Long userId, Long taskId);
+
     TaskResponse getTaskById(Long userId, Long taskId);
 
     void deleteTask(Long userId, Long taskId);
+
+    List<TaskResponse> getTasksWithFilter(Long id, Boolean completed, String priority, String search, boolean overdue, boolean today);
 }

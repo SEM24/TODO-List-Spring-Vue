@@ -2,6 +2,8 @@ package com.todo.auth.controller;
 
 import com.todo.auth.model.dto.*;
 import com.todo.auth.service.AuthService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,10 +21,12 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @Slf4j
 @Validated
+@Tag(name = "Authentication", description = "CRUD operation for Auth Controller")
 public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
+    @Operation(summary = "register")
     public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
         log.info("Registration attempt for email: {}", request.email());
 
@@ -35,6 +39,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
+    @Operation(summary = "login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
         log.info("Login attempt for email: {}", request.email());
 
@@ -48,6 +53,7 @@ public class AuthController {
 
 
     @PostMapping("/refresh")
+    @Operation(summary = "refresh")
     public ResponseEntity<AuthResponse> refreshAccessToken(HttpServletRequest request) {
         log.info("Access Token refresh attempt");
 
@@ -66,6 +72,7 @@ public class AuthController {
 
 
     @PostMapping("/logout")
+    @Operation(summary = "logout")
     public ResponseEntity<LogoutResponse> logout(HttpServletRequest request) {
         log.info("Logout attempt");
 
@@ -84,6 +91,7 @@ public class AuthController {
         // TODO: Implement method to get current user info
         return ResponseEntity.ok("Current user: " + authentication.getName());
     }
+
     @GetMapping("/user/me")
     @PreAuthorize("hasAuthority('ROLE_USER')")
     public ResponseEntity<String> getUser(Authentication authentication) {
@@ -91,6 +99,7 @@ public class AuthController {
         // TODO: Implement method to get current user info
         return ResponseEntity.ok("Current user: " + authentication.getName());
     }
+
     @PostMapping("/validate")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<String> validateToken(Authentication authentication) {
