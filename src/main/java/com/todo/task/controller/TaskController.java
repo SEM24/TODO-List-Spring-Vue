@@ -7,7 +7,6 @@ import com.todo.task.service.TaskService;
 import com.todo.user.model.enitity.User;
 import com.todo.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -75,7 +74,7 @@ public class TaskController {
     @PatchMapping("/{taskId}/toggle")
     @Operation(summary = "toggleTaskCompletion")
     public ResponseEntity<TaskResponse> toggleTaskCompletion(
-            @PathVariable Long taskId,
+            @PathVariable("taskId") Long taskId,
             Authentication authentication
     ) {
         User user = userService.getCurrentUser(authentication);

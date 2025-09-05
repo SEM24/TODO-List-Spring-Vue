@@ -22,6 +22,58 @@ const fetchTasks = async () => {
     loading.value = false
   }
 }
+const toggleTaskStatus = async (taskId) => {
+  console.log("All tasks:", tasks.value);
+  console.log("Task IDs:", tasks.value.map(t => t.id));
+  console.log("Toggling task with id:", taskId);
+  loading.value = true
+  error.value = null
+  try {
+    console.log("Toggling task with id:", taskId);
+    const result = await taskService.toggleTask(taskId)
+    if (result.success) {
+      console.log(tasks.value.map(t => t.id))
+      const taskIndex = tasks.value.findIndex((t) => t.id === taskId);
+      if (taskIndex !== -1) {
+        tasks.value[taskIndex] = {...tasks.value[taskIndex], ...result.data};
+      }
+    } else {
+      error.value = result.error
+    }
+  } catch (err) {
+    console.log(err)
+  } finally {
+    loading.value = false
+  }
+}
+const editTask = (taskId) => {
+  console.log('Edit task: ', taskId)
+  // todo
+}
+const deleteTask = async (taskId) => {
+  if (!confirm('Are you sure you want to delete this task?')) return
+
+  try {
+    const res = await taskService.deleteTask(taskId)
+    if (res.success) {
+      tasks.value = tasks.value.filter(t => t.id !== taskId)
+    } else {
+      error.value = res.error
+    }
+  } catch (err) {
+    console.error(err)
+  }
+}
+const formatDate = (dateString) => {
+  if (!dateString) return ''
+  return new Date(dateString).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+}
 onMounted(() => {
   fetchTasks()
 })
@@ -29,94 +81,252 @@ onMounted(() => {
 
 <template>
   <div class="task-list">
-    <div v-if="loading">Loading...</div>
-    <div v-else-if="error">{{ error }}</div>
+    <div class="task-header">
+      <h2>My tasks</h2>
+      <!--      TODO-->
+      <my-button class="btn-primary">+ Add New Task</my-button>
+    </div>
+    <div v-if="loading" class="loading-state">
+      <div class="spinner"></div>
+      Loading tasks...
+    </div>
+    <div v-else-if="error" class="error-state">{{ error }}</div>
     <div v-else-if="tasks.length === 0" class="empty-state">
       <h3>No tasks yet</h3>
-      <p>Create your first task!</p>
+      <p>Create your first task to get started!</p>
     </div>
-    <div v-else>
-      <div v-for="task in tasks" :key="task.id" class="task-item">
-        <h4>{{ task.title }}</h4>
-        <h4 :data-completed="task.completed">
-          {{ task.completed ? 'Done' : 'Pending' }}
-        </h4>
-        <h4 :class="`priority-${task.priority.toLowerCase()}`">
-          {{ task.priority }}
-        </h4>
-        <!--        todo add ability to toggle status-->
-        <my-button>
-          {{ task.completed === 'false' ? 'Not completed' : 'Completed' }}
-        </my-button>
+    <div v-else class="tasks-container">
+      <div v-for="task in tasks" :key="task.id" class="task-card">
+        <div class="task-main">
+          <div class="task-info">
+            <h3 class="task-title" :class="{ completed: task.completed }">
+              {{ task.title }}
+            </h3>
+            <p v-if="task.description" class="task-description">
+              {{ task.description }}
+            </p>
+
+            <div class="task-meta">
+              <span v-if="task.dueDate" class="due-date">
+                📅 {{ formatDate(task.dueDate) }}
+              </span>
+              <span class="created-date">
+                Created: {{ formatDate(task.createdAt) }}
+              </span>
+            </div>
+          </div>
+
+          <div class="task-badges">
+            <span class="status-badge" :class="{ completed: task.completed }">
+              {{ task.completed ? 'Done' : 'Pending' }}
+            </span>
+            <span class="priority-badge" :class="`priority-${task.priority.toLowerCase()}`">
+              {{ task.priority }}
+            </span>
+          </div>
+        </div>
+
+        <div class="task-actions">
+          <my-button
+            @click="toggleTaskStatus(task.id)"
+            :class="task.completed ? 'btn-secondary' : 'btn-success'"
+            size="small"
+          >
+            {{ task.completed ? '↺ Undo' : '✓ Done' }}
+          </my-button>
+
+          <my-button
+            @click="editTask(task.id)"
+            class="btn-primary"
+            size="small"
+          >
+            ✏ Edit
+          </my-button>
+
+          <my-button
+            @click="deleteTask(task.id)"
+            class="btn-danger"
+            size="small"
+          >
+            🗑 Delete
+          </my-button>
+        </div>
       </div>
     </div>
   </div>
 </template>
 <style scoped>
 .task-list {
-  max-width: 800px;
+  max-width: 900px;
   margin: 0 auto;
-  padding: 1rem;
+  padding: 2rem;
 }
 
-.task-item {
-  background: white;
-  border: 1px solid #e1e5e9;
-  border-radius: 8px;
-  padding: 1rem;
-  margin-bottom: 0.75rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: all 0.2s ease;
+.task-header {
   display: flex;
+  justify-content: space-between;
   align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #e1e5e9;
+}
+
+.task-header h2 {
+  margin: 0;
+  color: #333;
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 3rem;
+  color: #666;
+  font-size: 1.1rem;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.error-state {
+  background: #fee;
+  color: #c33;
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid #fcc;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: #666;
+  background: #f8f9fa;
+  border-radius: 12px;
+  border: 2px dashed #ddd;
+}
+
+.empty-state h3 {
+  margin: 0 0 1rem 0;
+  color: #333;
+  font-size: 1.5rem;
+}
+
+.tasks-container {
+  display: flex;
+  flex-direction: column;
   gap: 1rem;
 }
 
-.task-item:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  border-color: #667eea;
+.task-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e1e5e9;
+  transition: all 0.3s ease;
+  overflow: hidden;
 }
 
-.task-item h4 {
-  margin: 0;
-  font-size: 1rem;
+.task-card:hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
 }
 
-.task-item h4:first-child {
+.task-main {
+  padding: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.task-info {
   flex: 1;
-  font-weight: 500;
-  color: #333;
 }
 
-.task-item h4:nth-child(2) {
+.task-title {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #333;
+  transition: all 0.3s ease;
+}
+
+.task-title.completed {
+  text-decoration: line-through;
+  color: #666;
+  opacity: 0.7;
+}
+
+.task-description {
+  margin: 0 0 1rem 0;
+  color: #666;
+  line-height: 1.5;
+  font-size: 0.95rem;
+}
+
+.task-meta {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.85rem;
+  color: #888;
+}
+
+.due-date {
+  font-weight: 500;
+}
+
+/* Badges */
+.task-badges {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: flex-end;
+}
+
+.status-badge, .priority-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
   font-size: 0.8rem;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
   font-weight: 600;
   text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-/* Стили для completed статуса */
-.task-item h4:nth-child(2)[data-completed="true"] {
+.status-badge {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-badge.completed {
   background: #d4edda;
   color: #155724;
 }
 
-.task-item h4:nth-child(2)[data-completed="false"] {
-  background: #f8d7da;
-  color: #721c24;
-}
-
-.task-item h4:nth-child(3) {
-  font-size: 0.8rem;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  font-weight: 600;
-  min-width: 70px;
+.priority-badge {
+  min-width: 80px;
   text-align: center;
 }
 
-/* Стили для приоритетов */
 .priority-low {
   background: #d1ecf1;
   color: #0c5460;
@@ -137,32 +347,77 @@ onMounted(() => {
   color: white;
 }
 
-/* Loading и Error стили */
-.task-list > div:first-child {
-  text-align: center;
-  padding: 3rem;
-  font-size: 1.2rem;
-  color: #666;
+/* Действия */
+.task-actions {
+  background: #f8f9fa;
+  padding: 1rem 1.5rem;
+  display: flex;
+  gap: 0.75rem;
+  border-top: 1px solid #e9ecef;
 }
 
-.task-list > div:nth-child(2) {
-  text-align: center;
-  padding: 2rem;
-  background: #f8d7da;
-  color: #721c24;
-  border-radius: 8px;
-  border: 1px solid #f5c6cb;
+.btn-primary {
+  background: #667eea;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
-/* Пустой список */
-.empty-state {
-  text-align: center;
-  padding: 3rem;
-  color: #666;
+.btn-primary:hover {
+  background: #5a6fd8;
 }
 
-.empty-state h3 {
-  margin-bottom: 0.5rem;
-  color: #333;
+.btn-success {
+  background: #28a745;
+  color: white;
+}
+
+.btn-success:hover {
+  background: #218838;
+}
+
+.btn-secondary {
+  background: #6c757d;
+  color: white;
+}
+
+.btn-secondary:hover {
+  background: #545b62;
+}
+
+.btn-danger {
+  background: #dc3545;
+  color: white;
+}
+
+.btn-danger:hover {
+  background: #c82333;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .task-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+
+  .task-main {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .task-badges {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .task-actions {
+    flex-wrap: wrap;
+  }
 }
 </style>

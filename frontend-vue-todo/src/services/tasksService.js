@@ -46,6 +46,46 @@ class TaskService {
       }
     }
   }
+
+  async getTaskById(taskId) {
+
+  }
+
+  async deleteTask(taskId) {
+    try {
+      console.log("Service received taskId:", taskId);
+      const response = await apiClient.delete(`api/v1/tasks/${taskId}`)
+      return {
+        success: true,
+        data: response.data,
+        message: "Task status deleted"
+      }
+    } catch (error) {
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Failed to delete task',
+        status: error.response?.status
+      }
+    }
+  }
+
+  async toggleTask(taskId) {
+    try {
+      console.log("Service received taskId:", taskId);
+      const response = await apiClient.patch(`api/v1/tasks/${taskId}/toggle`)
+      return {
+        success: true,
+        data: response.data,
+        message: "Task status updated"
+      }
+    } catch (error) {
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Failed to toggle task',
+        status: error.response?.status
+      }
+    }
+  }
 }
 
 export const taskService = new TaskService()
