@@ -38,7 +38,7 @@ public class SecurityConfig {
     private final UserDetailsServiceImpl userDetailsService;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
     @Value("${security.cors.allowed-origins}")
-    private List<String> allowedOrigins;
+    private String  allowedOriginsRaw;
 
     @Value("${security.cors.allowed-methods}")
     private List<String> allowedMethods;
@@ -70,7 +70,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOriginPatterns(allowedOrigins);
+        configuration.setAllowedOriginPatterns(List.of(allowedOriginsRaw.split(",")));
         configuration.setAllowedMethods(allowedMethods);
         configuration.setAllowedHeaders(allowedHeaders);
         configuration.setAllowCredentials(allowCredentials);

@@ -76,6 +76,7 @@ public class TaskServiceImpl implements TaskService {
                 .map(TaskResponse::from)
                 .toList();
     }
+
     @Override
     public TaskResponse createTask(Long userId, TaskCreateRequest request) {
         User user = userService.findById(userId);
@@ -92,6 +93,7 @@ public class TaskServiceImpl implements TaskService {
         Task savedTask = taskRepository.save(task);
         return TaskResponse.from(savedTask);
     }
+
     @Override
     public TaskResponse updateTask(Long userId, Long taskId, TaskUpdateRequest request) {
         Task task = getTaskByIdAndUserId(taskId, userId);
@@ -108,9 +110,10 @@ public class TaskServiceImpl implements TaskService {
         Task savedTask = taskRepository.save(task);
         return TaskResponse.from(savedTask);
     }
+
     @Override
     public TaskResponse toggleTaskCompletion(Long userId, Long taskId) {
-        Task task = getTaskByIdAndUserId(taskId, userId);
+        Task task = getTaskByIdAndUserId(userId, taskId);
         task.setCompleted(!task.getCompleted());
         Task savedTask = taskRepository.save(task);
         return TaskResponse.from(savedTask);
