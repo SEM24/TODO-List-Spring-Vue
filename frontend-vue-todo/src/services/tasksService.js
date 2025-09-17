@@ -47,8 +47,57 @@ class TaskService {
     }
   }
 
-  async getTaskById(taskId) {
+  async createTask(taskData) {
+    try {
+      const response = await apiClient.post('/api/v1/tasks', taskData)
+      return {
+        success: true,
+        data: response.data,
+        message: "Task created successfully"
+      }
+    } catch (er) {
+      return {
+        success: false,
+        error: er.response?.data?.message || 'Failed to create task',
+        status: er.response?.status
+      }
+    }
+  }
 
+  async editTask(taskId, taskData) {
+    //TODO doesn't work
+    try {
+      const response = await apiClient.put(`/api/v1/tasks/${taskId}`, taskData)
+      return {
+        success: true,
+        data: response.data,
+        message: "Task updated successfully"
+      }
+    } catch (er) {
+      return {
+        success: false,
+        error: er.response?.data?.message || 'Failed to update task',
+        status: er.response?.status
+      }
+    }
+  }
+
+  async getTaskById(taskId) {
+    try {
+      const response = await apiClient.get(`/api/v1/tasks/${taskId}`)
+      return {
+        success: true,
+        data: response.data,
+        message: "Task loaded successfully"
+      }
+    } catch (error) {
+      console.error("Get task error:", error)
+      return {
+        success: false,
+        error: error.response?.data?.message || 'Failed to load task',
+        status: error.response?.status
+      }
+    }
   }
 
   async deleteTask(taskId) {

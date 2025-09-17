@@ -2,10 +2,17 @@
 import {onMounted, ref} from "vue";
 import taskService from "@/services/tasksService.js";
 import MyButton from "@/components/UI/MyButton.vue";
+import TaskForm from "@/components/tasks/TaskForm.vue";
 
 const tasks = ref([])
 const loading = ref(false)
 const error = ref(null)
+const showTaskForm = ref(false)
+const editingTask = ref(null)
+const addNewTask = () => {
+  editingTask.value = null
+  showTaskForm.value = true
+}
 const fetchTasks = async () => {
   loading.value = true
   error.value = null
@@ -22,34 +29,64 @@ const fetchTasks = async () => {
     loading.value = false
   }
 }
-const toggleTaskStatus = async (taskId) => {
-  console.log("All tasks:", tasks.value);
-  console.log("Task IDs:", tasks.value.map(t => t.id));
-  console.log("Toggling task with id:", taskId);
-  loading.value = true
-  error.value = null
+const handleTaskSubmit = async (taskData) => {
   try {
-    console.log("Toggling task with id:", taskId);
-    const result = await taskService.toggleTask(taskId)
-    if (result.success) {
-      console.log(tasks.value.map(t => t.id))
-      const taskIndex = tasks.value.findIndex((t) => t.id === taskId);
-      if (taskIndex !== -1) {
-        tasks.value[taskIndex] = {...tasks.value[taskIndex], ...result.data};
+    let result
+
+    if (editingTask.value && editingTask.value.id) {
+      result = await taskService.editTask(editingTask.value.id, taskData)
+
+      if (result.success) {
+        const taskIndex = tasks.value.findIndex(t => t.id === editingTask.value.id)
+        if (taskIndex !== -1) {
+          tasks.value[taskIndex] = { ...tasks.value[taskIndex], ...result.data }
+        }
+        showTaskForm.value = false
+        editingTask.value = null
+      } else {
+        error.value = result.error
       }
     } else {
-      error.value = result.error
+      result = await taskService.createTask(taskData)
+
+      if (result.success) {
+        tasks.value.push(result.data)
+        showTaskForm.value = false
+      } else {
+        error.value = result.error
+      }
     }
   } catch (err) {
-    console.log(err)
-  } finally {
-    loading.value = false
+    console.error('Failed to save task:', err)
+    error.value = 'Failed to save task'
   }
 }
-const editTask = (taskId) => {
-  console.log('Edit task: ', taskId)
-  // todo
-}
+const createTask = handleTaskSubmit
+
+// const toggleTaskStatus = async (taskId) => {
+//   console.log("All tasks:", tasks.value);
+//   console.log("Task IDs:", tasks.value.map(t => t.id));
+//   console.log("Toggling task with id:", taskId);
+//   loading.value = true
+//   error.value = null
+//   try {
+//     console.log("Toggling task with id:", taskId);
+//     const result = await taskService.toggleTask(taskId)
+//     if (result.success) {
+//       console.log(tasks.value.map(t => t.id))
+//       const taskIndex = tasks.value.findIndex((t) => t.id === taskId);
+//       if (taskIndex !== -1) {
+//         tasks.value[taskIndex] = {...tasks.value[taskIndex], ...result.data};
+//       }
+//     } else {
+//       error.value = result.error
+//     }
+//   } catch (err) {
+//     console.log(err)
+//   } finally {
+//     loading.value = false
+//   }
+// }
 const deleteTask = async (taskId) => {
   if (!confirm('Are you sure you want to delete this task?')) return
 
@@ -63,6 +100,18 @@ const deleteTask = async (taskId) => {
   } catch (err) {
     console.error(err)
   }
+}
+const editTask = (taskId) => {
+  console.log('Edit task: ', taskId)
+  const task = tasks.value.find(t => t.id === taskId)
+  if (task) {
+    editingTask.value = { ...task }
+    showTaskForm.value = true
+  }
+}
+const closeTaskForm = () => {
+  showTaskForm.value = false
+  editingTask.value = null
 }
 const formatDate = (dateString) => {
   if (!dateString) return ''
@@ -84,7 +133,7 @@ onMounted(() => {
     <div class="task-header">
       <h2>My tasks</h2>
       <!--      TODO-->
-      <my-button class="btn-primary">+ Add New Task</my-button>
+      <my-button @click="addNewTask">+ Add New Task</my-button>
     </div>
     <div v-if="loading" class="loading-state">
       <div class="spinner"></div>
@@ -128,7 +177,7 @@ onMounted(() => {
 
         <div class="task-actions">
           <my-button
-            @click="toggleTaskStatus(task.id)"
+            @click="handleTaskSubmit(task.id)"
             :class="task.completed ? 'btn-secondary' : 'btn-success'"
             size="small"
           >
@@ -154,6 +203,13 @@ onMounted(() => {
       </div>
     </div>
   </div>
+  <TaskForm
+    v-if="showTaskForm"
+    :is-edit="!!editingTask"
+    :task-data="editingTask || {}"
+    @close="closeTaskForm"
+    @submit="handleTaskSubmit"
+  />
 </template>
 <style scoped>
 .task-list {
